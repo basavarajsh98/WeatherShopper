@@ -10,7 +10,7 @@ Scope:
 
 """
 import time
-from findproducts import aloe_almond, spf5030, add_to_cart
+from methods import aloe_almond, spf5030, add_to_cart
 from selenium import webdriver
 
 # create an instance of Chrome Webdriver
