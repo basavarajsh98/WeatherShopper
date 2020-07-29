@@ -23,7 +23,6 @@ value = browser.find_element_by_xpath("//span[contains(@id,'temperature')]")
 # Slice only the temperature value
 temp = int((value.text)[:-2])
 value = value.text
-
 # Conditions for shopping moisturizer/sunscreen
 if temp < 19:
     # find the 'Buy moisturizers' button
@@ -47,3 +46,5 @@ elif temp > 34:
         print("You're at the sunscreens page.")
     else:
         print("Oops! Redirecting failed")
+
+browser.quit()
