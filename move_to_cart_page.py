@@ -53,5 +53,10 @@ if cart_items == "2 item(s)":
     time.sleep(3)
 else:
     print("Failed to redirect to cart page")
-
-browser.quit()
+    browser.quit()
+#Verify if the user taken to cart
+if browser.current_url == "https://weathershopper.pythonanywhere.com/cart":
+    print("Great! You're in your cart")
+else:
+    print('Oops! Something went wrong')
+    browser.quit()
