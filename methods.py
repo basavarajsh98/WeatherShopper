@@ -1,10 +1,13 @@
+"""
+This module contains the required methods for automation of weathershopper application
+"""
 def aloe_almond(browser):
     """
     Returns the price of the least expensive aloe and almond products
     """
     # find the products with aloe
-    product_list_aloe = browser.find_elements_by_xpath("//*[contains(text(),'Aloe') or contains(text(),"
-                                                       "'aloe')]/following-sibling::p")
+    product_list_aloe = browser.find_elements_by_xpath(
+        "//*[contains(text(),'Aloe') or contains(text(),'aloe')]/following-sibling::p")
     # find prices of the aloe products
     price_list_aloe = [product_list_aloe[i].text for i in range(len(product_list_aloe))]
     # slice only the price value
@@ -13,8 +16,8 @@ def aloe_almond(browser):
     cheap_aloe = min(price_only_aloe)
 
     # find the products with almond
-    product_list_almond = browser.find_elements_by_xpath("//*[contains(text(),'Almond') or contains(text(),"
-                                                         "'almond')]/following-sibling::p")
+    product_list_almond = browser.find_elements_by_xpath(
+        "//*[contains(text(),'Almond') or contains(text(),'almond')]/following-sibling::p")
     # find prices of the almond products
     price_list_almond = [product_list_almond[i].text for i in range(len(product_list_almond))]
     # slice only the price value
@@ -29,25 +32,25 @@ def spf5030(browser):
     Returns the price of the least expensive SPF50 and SPF30 products
     """
     # find the SP550 products
-    product_list_SPF50 = browser.find_elements_by_xpath("//*[contains(text(),'SPF-50') or contains(text(),"
-                                                        "'spf-50')]/following-sibling::p")
+    product_list_spf50 = browser.find_elements_by_xpath(
+        "//*[contains(text(),'SPF-50') or contains(text(),'spf-50')]/following-sibling::p")
     # find prices of the SP550 products
-    price_list_SPF50 = [product_list_SPF50[i].text for i in range(len(product_list_SPF50))]
+    price_list_spf50 = [product_list_spf50[i].text for i in range(len(product_list_spf50))]
     # slice only the price value
-    price_only_SPF50 = [int(price[-3:]) for price in price_list_SPF50]
+    price_only_spf50 = [int(price[-3:]) for price in price_list_spf50]
     # find the least expensive SPF50 item
-    cheap_SPF50 = min(price_only_SPF50)
+    cheap_spf50 = min(price_only_spf50)
 
     # find the products with almond
-    product_list_SPF30 = browser.find_elements_by_xpath("//*[contains(text(),'SPF-30') or contains(text(),"
-                                                        "'spf-30')]/following-sibling::p")
+    product_list_spf30 = browser.find_elements_by_xpath(
+        "//*[contains(text(),'SPF-30') or contains(text(),'spf-30')]/following-sibling::p")
     # find prices of the almond products
-    price_list_SPF30 = [product_list_SPF30[i].text for i in range(len(product_list_SPF30))]
+    price_list_spf30 = [product_list_spf30[i].text for i in range(len(product_list_spf30))]
     # slice only the price value
-    price_only_SPF30 = [int(price[-3:]) for price in price_list_SPF30]
+    price_only_spf30 = [int(price[-3:]) for price in price_list_spf30]
     # find the least expensive SPF30 item
-    cheap_SPF30 = min(price_only_SPF30)
-    return [cheap_SPF50, cheap_SPF30]
+    cheap_spf30 = min(price_only_spf30)
+    return [cheap_spf50, cheap_spf30]
 
 
 def add_to_cart(browser, prices):
@@ -56,7 +59,8 @@ def add_to_cart(browser, prices):
     """
     for i in prices:
         # find 'Add' element to add to cart
-        browser.find_element_by_xpath(f"//*[contains(text(),{i})]/following-sibling::button").click()
+        browser.find_element_by_xpath(f"//*[contains(text(),{i})]"
+                                      f"/following-sibling::button").click()
     cart_items = browser.find_element_by_id("cart").text
     return cart_items
 
@@ -75,19 +79,20 @@ def total(browser, prices):
     ratio = int(total_manual / total_shown)
     return ratio
 
-def payment(browser, email, ccn, exp,cvc,zip,remember,mobile):
+
+def payment(browser, email, ccn, exp, cvc, zipcode, remember, mobile):
     """
     This method fills all the details for the payment
     """
     iframe = browser.find_elements_by_tag_name('iframe')[0]
     browser.switch_to.frame(iframe)
-    if ('@' in email) & ('.' in email) & ~(email.startswith("@",0)):
+    if ('@' in email) & ('.' in email) & ~(email.startswith("@", 0)):
         browser.find_element_by_xpath("//input[@placeholder='Email']").send_keys(email)
     browser.find_element_by_xpath("//input[@placeholder='Card number']").send_keys(ccn)
     browser.find_element_by_xpath("//input[@placeholder='MM / YY']").send_keys(exp)
     browser.find_element_by_xpath("//input[@placeholder='CVC']").send_keys(cvc)
-    browser.find_element_by_xpath("//input[@placeholder='ZIP Code']").send_keys(zip)
-    if remember.lower() in ["yes","y"]:
+    browser.find_element_by_xpath("//input[@placeholder='ZIP Code']").send_keys(zipcode)
+    if remember.lower() in ["yes", "y"]:
         remember = browser.find_element_by_xpath("//div[@class='Checkbox-tick']").click()
         browser.find_element_by_xpath("//input[@inputmode='tel']").send_keys(mobile)
     browser.find_element_by_xpath("//button[@type='submit']").click()
