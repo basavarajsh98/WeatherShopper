@@ -46,5 +46,5 @@ elif temp > 34:
         print("You're at the sunscreens page.")
     else:
         print("Oops! Redirecting failed")
-
+time.sleep(3)
 browser.quit()
