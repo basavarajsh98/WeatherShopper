@@ -59,3 +59,35 @@ def add_to_cart(browser, prices):
         browser.find_element_by_xpath(f"//*[contains(text(),{i})]/following-sibling::button").click()
     cart_items = browser.find_element_by_id("cart").text
     return cart_items
+
+
+def total(browser, prices):
+    """
+    returns the ratio of total price calculated to the total price displayed
+    """
+    # Calculate the total price
+    total_manual = sum(prices)
+    # find total price element
+    total_shown = browser.find_element_by_xpath("//p[contains(@id,'total')]")
+    # slice only the price value
+    total_shown = int(total_shown.text[-3:])
+    # compute the ratio
+    ratio = int(total_manual / total_shown)
+    return ratio
+
+def payment(browser, email, ccn, exp,cvc,zip,remember,mobile):
+    """
+    This method fills all the details for the payment
+    """
+    iframe = browser.find_elements_by_tag_name('iframe')[0]
+    browser.switch_to.frame(iframe)
+    if ('@' in email) & ('.' in email) & ~(email.startswith("@",0)):
+        browser.find_element_by_xpath("//input[@placeholder='Email']").send_keys(email)
+    browser.find_element_by_xpath("//input[@placeholder='Card number']").send_keys(ccn)
+    browser.find_element_by_xpath("//input[@placeholder='MM / YY']").send_keys(exp)
+    browser.find_element_by_xpath("//input[@placeholder='CVC']").send_keys(cvc)
+    browser.find_element_by_xpath("//input[@placeholder='ZIP Code']").send_keys(zip)
+    if remember.lower() in ["yes","y"]:
+        remember = browser.find_element_by_xpath("//div[@class='Checkbox-tick']").click()
+        browser.find_element_by_xpath("//input[@inputmode='tel']").send_keys(mobile)
+    browser.find_element_by_xpath("//button[@type='submit']").click()
