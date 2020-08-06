@@ -7,57 +7,38 @@ Scope:
 5) Verify if the cart has only 2 item(s)
 6) Verify if the user is taken to redirected page(cart page)
 5) Close the browser
-
 """
 import time
 from selenium import webdriver
-from methods import aloe_almond, spf5030, add_to_cart
+from product_utils import take_me_to_product_page, min_price
+from cart_utils import add_to_cart, click_on_cart
 
 
-# create an instance of Chrome WebDRIVER
-DRIVER = webdriver.Chrome()
-# maximize the DRIVER window
-DRIVER.maximize_window()
-# navigate to weathershoppper page
-DRIVER.get("https://weathershopper.pythonanywhere.com/")
+def cart_page():
+    """takes you to the cart page"""
 
-# KEY POINT: Code to add products to cart
-# Find the TEMPerature element
-VALUE = DRIVER.find_element_by_xpath("//span[contains(@id,'temperature')]")
-# Slice only the TEMPerature VALUE
-TEMP = int((VALUE.text)[:-2])
-VALUE = VALUE.text
-# Conditions for shopping moisturizer/sunscreen
-if TEMP < 19:
-    # find the 'Buy moisturizers' button
-    DRIVER.find_element_by_xpath("//button[contains(text(),'Buy moisturizers')]").click()
-    # Wait for new page to load
+    # create webdriver instance and navigate to main page
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    # navigate to main page
+    driver.get("https://weathershopper.pythonanywhere.com/")
+    # go to product page depending on the temperature
+    items = take_me_to_product_page(driver)
     time.sleep(3)
-    # find the cheapest products
-    PRICES = aloe_almond(DRIVER)
-    # add the cheapest products to cart
-    CART_ITEMS = add_to_cart(DRIVER, PRICES)
-elif TEMP > 34:
-    # find the 'Buy sunscreens' button
-    DRIVER.find_element_by_xpath("//button[contains(text(),'Buy sunscreens')]").click()
-    # Wait for new page to load
+    # find the least expensive products
+    cheap_products = min_price(driver, items)
+    # add them to cart
+    add_to_cart(driver, cheap_products)
+    # go to cart
+    click_on_cart(driver)
     time.sleep(3)
-    # find the cheapest products
-    PRICES = spf5030(DRIVER)
-    # add the cheapest products to cart
-    CART_ITEMS = add_to_cart(DRIVER, PRICES)
-# Verify if the cart has only 2 item(s) and redirect, if yes
-if CART_ITEMS == "2 item(s)":
-    print("Redirecting to cart page")
-    DRIVER.find_element_by_id("cart").click()
-    # Wait for new page to load
-    time.sleep(3)
-else:
-    print("Failed to redirect to cart page")
-    DRIVER.quit()
-#Verify if the user taken to cart
-if DRIVER.current_url == "https://weathershopper.pythonanywhere.com/cart":
-    print("Great! You're in your cart")
-else:
-    print('Oops! Something went wrong')
-    DRIVER.quit()
+    # Verify if the user taken to cart
+    if driver.current_url == "https://weathershopper.pythonanywhere.com/cart":
+        print("Great! You're in your cart")
+    else:
+        print('Oops! Something went wrong')
+        driver.quit()
+
+
+if __name__ == "__main__":
+    cart_page()

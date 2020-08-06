@@ -10,71 +10,57 @@ Scope:
 """
 import time
 from selenium import webdriver
-from methods import aloe_almond, spf5030, add_to_cart, total, payment
+from cart_utils import take_me_to_cart, verify_cart
+from payment_utils import click_on_pay_with_card, go_to_payment, generate_email, enter_email
+from payment_utils import enter_card_details, enter_zipcode, want_me_to_remember, click_on_pay
 
-# create an instance of Chrome Webdriver
-DRIVER = webdriver.Chrome()
-# maximize the DRIVER window
-DRIVER.maximize_window()
-# navigate to weathershoppper page
-DRIVER.get("https://weathershopper.pythonanywhere.com/")
 
-# KEY POINT: To make the payment
-# Find the TEMPerature element
-VALUE = DRIVER.find_element_by_xpath("//span[contains(@id,'temperature')]")
-# Slice only the TEMPerature VALUE
-TEMP = int((VALUE.text)[:-2])
-VALUE = VALUE.text
-PRICES = 0
-if TEMP < 19:
-    # find the 'Buy moisturizers' button
-    DRIVER.find_element_by_xpath("//button[contains(text(),'Buy moisturizers')]").click()
-    # Wait for new page to load
-    time.sleep(3)
-    # find the cheapest products
-    PRICES = aloe_almond(DRIVER)
-elif TEMP > 34:
-    # find the 'Buy sunscreens' button
-    DRIVER.find_element_by_xpath("//button[contains(text(),'Buy sunscreens')]").click()
-    # Wait for new page to load
-    time.sleep(3)
-    # find the cheapest products
-    PRICES = spf5030(DRIVER)
+def checkout_page():
+    """takes you to the checkout page"""
 
-# add the cheapest products to cart
-CART_ITEMS = add_to_cart(DRIVER, PRICES)
-# find cart element
-DRIVER.find_element_by_id("cart").click()
-# compare the displayed and calculated toal price
-RATIO = total(DRIVER, PRICES)
-# Verify the total amount and proceed to payment
-if RATIO == 1:
-    print("Total amount is verified. Redirecting to payment page")
-    # redirect to payment page
-    DRIVER.find_element_by_xpath("//span[contains(text(),'Pay with Card')]").click()
-    # Wait for new page to load
-    time.sleep(3)
-else:
-    print("Oh! Total doesn't add up")
-    DRIVER.quit()
+    # create webdriver instance of chrome
+    driver = webdriver.Chrome()
+    driver.maximize_window()
+    # navigate to main page
+    driver.get("https://weathershopper.pythonanywhere.com/")
 
-# fill all the required details to make the payment
-# payment(DRIVER, email, credit_card_number, expiry_date, CVC, zipcode, remember, mobile):
-payment(DRIVER, 'weathershopperapp@qxf2.com',
-        '4242424242424242', '0424', '425', '560054', 'N', '9562145587')
-# wait for new page to load
-time.sleep(5)
+    # find the least expensive products and add to cart
+    cheap_products = take_me_to_cart(driver)
+    # verify the cart items and total price
+    result = verify_cart(driver, cheap_products)
+    if result:
+        print("Total amount is verified. Redirecting to payment page")
+        click_on_pay_with_card(driver)
+    else:
+        print("Oh! Total doesn't add up")
+        driver.quit()
+    # wait for page to load
+    time.sleep(5)
+    # switch to payment frame
+    go_to_payment(driver)
+    # enter payment details
+    email = generate_email()
+    enter_email(driver, email)
+    enter_card_details(driver, "4242424242424242", "824", "956")
+    enter_zipcode(driver, "560054")
+    want_me_to_remember(driver, "Y", "8456321456")
+    click_on_pay(driver)
+    time.sleep(7)
 
-# Verify if the user is taken to checkout page
-if DRIVER.current_url == "https://weathershopper.pythonanywhere.com/confirmation":
-    print("Succesfully redirected to checkout page")
-else:
-    print('Oops! Something went wrong')
-    DRIVER.quit()
-# Verify if the payment was succesfull
-if DRIVER.find_element_by_xpath("//h2[contains(.,'PAYMENT SUCCESS')]"):
-    print("Payment Done")
-else:
-    print("Payment failed")
-time.sleep(2)
-DRIVER.close()
+    # Verify if the user is taken to checkout page
+    if driver.current_url == "https://weathershopper.pythonanywhere.com/confirmation":
+        print("Succesfully redirected to checkout page")
+        if driver.find_element_by_xpath("//h2[contains(.,'PAYMENT SUCCESS')]"):
+            print("Payment Done")
+        else:
+            print("Payment failed")
+    else:
+        print('Oops! Something went wrong')
+        driver.quit()
+
+    time.sleep(5)
+    driver.close()
+
+
+if __name__ == "__main__":
+    checkout_page()
